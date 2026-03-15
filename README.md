@@ -47,3 +47,22 @@ quant-trading-strategies
 
 Build a collection of quantitative trading experiments and improve understanding
 of financial markets, statistical modelling, and trading strategy evaluation.
+
+## Example Strategy: Mean Reversion
+
+The repository currently includes an implementation of a simple mean reversion strategy.
+
+Idea:
+If the price deviates significantly from its moving average, it may revert back to the mean.
+
+Trading rule:
+
+Buy when price < 20-day moving average  
+Sell when price > 20-day moving average  
+
+The strategy downloads historical market data and evaluates performance using
+cumulative returns.
+
+See:
+
+mean_reversion_strategy.ipynb
