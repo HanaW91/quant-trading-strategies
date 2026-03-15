@@ -65,4 +65,15 @@ cumulative returns.
 
 See:
 
-mean_reversion_strategy.ipynb
+mean_reversion_strategy.py
+
+## Boeing vs Airbus Return and Risk Analysis
+
+This notebook compares Boeing and Airbus stock performance using:
+- daily returns
+- monthly returns
+- cumulative returns
+- correlation and risk analysis
+
+File:
+`boeing_airbus_return_and_risk_analysis.ipynb`
