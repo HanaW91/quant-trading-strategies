@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Quant Strategy Results</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="styles.css?v=mobile-metrics-20260512" />
+    <link rel="stylesheet" href="styles.css?v=analytics-heatmap-20260512" />
   </head>
   <body>
     <header class="topbar">
@@ -71,6 +71,16 @@
         </article>
       </section>
 
+      <section class="panel heatmap-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="label" id="monthlyReturnsLabel">Monthly Returns</p>
+            <h3 id="monthlyHeatmapTitle">Heatmap</h3>
+          </div>
+        </div>
+        <div class="heatmap-wrap" id="monthlyHeatmap"></div>
+      </section>
+
       <section class="panel image-panel">
         <div class="panel-heading">
           <div>
@@ -83,6 +93,6 @@
       </section>
     </main>
 
-    <script src="app.js?v=20260512-korea-improved" charset="utf-8"></script>
+    <script src="app.js?v=analytics-heatmap-20260512" charset="utf-8"></script>
   </body>
 </html>

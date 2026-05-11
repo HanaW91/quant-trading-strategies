@@ -11,6 +11,7 @@ const strategies = {
       { key: "market_equity", labelKey: "buyHold", color: "#58a6ff" },
       { key: "active_equity", labelKey: "activeSleeve", color: "#f4b860" },
     ],
+    returnKey: "portfolio_return",
     signalKey: "active_position",
     metrics(row) {
       return [
@@ -33,6 +34,7 @@ const strategies = {
       { key: "strategy_equity", labelKey: "strategy", color: "#5de4e4" },
       { key: "market_equity", labelKey: "market", color: "#58a6ff" },
     ],
+    returnKey: "strategy_return",
     signalKey: "signal",
     metrics(row) {
       return [
@@ -88,6 +90,8 @@ const translations = {
     generatedOutput: "Generated Output",
     signalChart: "Signal Chart",
     signalChartAlt: "Strategy signal chart",
+    monthlyReturns: "Monthly Returns",
+    monthlyHeatmap: "Heatmap",
     openPng: "Open PNG",
     portfolioVsMarket: "Portfolio vs Market",
     strategyVsMarket: "Strategy vs Market",
@@ -122,6 +126,12 @@ const translations = {
     strategyReturn: "Strategy Return",
     marketReturn: "Market Return",
     maxDrawdown: "Max Drawdown",
+    sharpeRatio: "Sharpe Ratio",
+    sortinoRatio: "Sortino Ratio",
+    winRate: "Win Rate",
+    annualizedDaily: "Annualized from daily returns",
+    downsideRiskAdjusted: "Downside-risk adjusted",
+    positiveReturnDays: "Positive return days",
     rsiExits: "RSI Exits",
     stopLossExits: "Stop Loss Exits",
     smaExits: "SMA Exits",
@@ -162,6 +172,8 @@ const translations = {
     generatedOutput: "產生的輸出",
     signalChart: "訊號圖",
     signalChartAlt: "策略訊號圖",
+    monthlyReturns: "月報酬",
+    monthlyHeatmap: "熱力圖",
     openPng: "開啟 PNG",
     portfolioVsMarket: "投資組合 vs 市場",
     strategyVsMarket: "策略 vs 市場",
@@ -196,6 +208,12 @@ const translations = {
     strategyReturn: "策略報酬",
     marketReturn: "市場報酬",
     maxDrawdown: "最大回撤",
+    sharpeRatio: "夏普比率",
+    sortinoRatio: "索提諾比率",
+    winRate: "勝率",
+    annualizedDaily: "由日報酬年化",
+    downsideRiskAdjusted: "下方風險調整",
+    positiveReturnDays: "正報酬交易日",
     rsiExits: "RSI 出場",
     stopLossExits: "停損出場",
     smaExits: "SMA 出場",
@@ -251,6 +269,9 @@ const els = {
   activeSignalTitle: document.querySelector("#activeSignalTitle"),
   generatedOutputLabel: document.querySelector("#generatedOutputLabel"),
   signalChartTitle: document.querySelector("#signalChartTitle"),
+  monthlyReturnsLabel: document.querySelector("#monthlyReturnsLabel"),
+  monthlyHeatmapTitle: document.querySelector("#monthlyHeatmapTitle"),
+  monthlyHeatmap: document.querySelector("#monthlyHeatmap"),
   refreshStatus: document.querySelector("#refreshStatus"),
   refreshButton: document.querySelector("#refreshButton"),
   languageButton: document.querySelector("#languageButton"),
@@ -350,7 +371,8 @@ async function render() {
   els.signalImage.src = withCacheBust(row.chart_output);
 
   renderQuickStats(row);
-  renderMetrics(strategy.metrics(row));
+  renderMetrics([...strategy.metrics(row), ...analyticsMetrics(activeSeries, strategy.returnKey)]);
+  renderMonthlyHeatmap(activeSeries, strategy.returnKey);
   renderCharts();
 }
 
@@ -433,6 +455,8 @@ function renderStaticText() {
   els.generatedOutputLabel.textContent = tr("generatedOutput");
   els.signalChartTitle.textContent = tr("signalChart");
   els.signalImage.alt = tr("signalChartAlt");
+  els.monthlyReturnsLabel.textContent = tr("monthlyReturns");
+  els.monthlyHeatmapTitle.textContent = tr("monthlyHeatmap");
   els.chartLink.textContent = tr("openPng");
   els.refreshButton.textContent = tr("refresh");
   els.refreshButton.title = tr("refreshTitle");
@@ -465,6 +489,74 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
+}
+
+function analyticsMetrics(rows, returnKey) {
+  const returns = rows.map((row) => number(row[returnKey])).filter(Number.isFinite);
+  const activeReturns = returns.filter((value) => value !== 0);
+  const average = mean(returns);
+  const volatility = standardDeviation(returns);
+  const downside = standardDeviation(returns.filter((value) => value < 0));
+  const sharpe = volatility > 0 ? (average / volatility) * Math.sqrt(252) : NaN;
+  const sortino = downside > 0 ? (average / downside) * Math.sqrt(252) : NaN;
+  const wins = activeReturns.filter((value) => value > 0).length;
+  const winRate = activeReturns.length ? (wins / activeReturns.length) * 100 : NaN;
+
+  return [
+    [tr("sharpeRatio"), ratio(sharpe), tr("annualizedDaily")],
+    [tr("sortinoRatio"), ratio(sortino), tr("downsideRiskAdjusted")],
+    [tr("winRate"), pct(winRate), tr("positiveReturnDays")],
+  ];
+}
+
+function renderMonthlyHeatmap(rows, returnKey) {
+  const monthly = monthlyReturns(rows, returnKey);
+  const years = [...new Set(monthly.map((item) => item.year))].sort();
+  const months = Array.from({ length: 12 }, (_, index) => index);
+
+  els.monthlyHeatmap.innerHTML = [
+    `<div class="heatmap-corner"></div>`,
+    ...months.map((month) => `<div class="heatmap-month">${monthLabel(month)}</div>`),
+    ...years.flatMap((year) => [
+      `<div class="heatmap-year">${year}</div>`,
+      ...months.map((month) => {
+        const item = monthly.find((entry) => entry.year === year && entry.month === month);
+        if (!item) return `<div class="heatmap-cell empty"></div>`;
+        return `<div class="heatmap-cell ${item.value >= 0 ? "gain" : "loss"}" style="--intensity:${heatIntensity(
+          item.value,
+        )}" title="${year} ${monthLabel(month)}: ${pct(item.value)}">${pct(item.value)}</div>`;
+      }),
+    ]),
+  ].join("");
+}
+
+function monthlyReturns(rows, returnKey) {
+  const grouped = new Map();
+  rows.forEach((row) => {
+    const value = number(row[returnKey]);
+    const date = new Date(row.Date);
+    if (!Number.isFinite(value) || Number.isNaN(date.getTime())) return;
+    const key = `${date.getFullYear()}-${date.getMonth()}`;
+    if (!grouped.has(key)) {
+      grouped.set(key, { year: date.getFullYear(), month: date.getMonth(), compounded: 1 });
+    }
+    grouped.get(key).compounded *= 1 + value;
+  });
+  return [...grouped.values()].map((item) => ({
+    year: item.year,
+    month: item.month,
+    value: (item.compounded - 1) * 100,
+  }));
+}
+
+function heatIntensity(value) {
+  return Math.min(1, Math.max(0.18, Math.abs(value) / 12)).toFixed(2);
+}
+
+function monthLabel(month) {
+  return new Intl.DateTimeFormat(state.lang === "zh" ? "zh-Hant" : undefined, { month: "short" }).format(
+    new Date(2024, month, 1),
+  );
 }
 
 function renderMetrics(metrics) {
@@ -663,11 +755,27 @@ function number(value) {
 }
 
 function pct(value) {
-  return `${num(value, 1)}%`;
+  return Number.isFinite(Number(value)) ? `${num(value, 1)}%` : "N/A";
 }
 
 function num(value, digits = 0) {
   return Number(value).toLocaleString(undefined, { maximumFractionDigits: digits, minimumFractionDigits: digits });
+}
+
+function ratio(value) {
+  return Number.isFinite(value) ? value.toFixed(2) : "N/A";
+}
+
+function mean(values) {
+  if (!values.length) return NaN;
+  return values.reduce((total, value) => total + value, 0) / values.length;
+}
+
+function standardDeviation(values) {
+  if (values.length < 2) return NaN;
+  const average = mean(values);
+  const variance = values.reduce((total, value) => total + (value - average) ** 2, 0) / (values.length - 1);
+  return Math.sqrt(variance);
 }
 
 function int(value) {

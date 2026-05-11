@@ -60,6 +60,7 @@ h2 {
   margin-top: 6px;
   font-size: clamp(1.45rem, 2.6vw, 2.7rem);
   letter-spacing: 0;
+  overflow-wrap: anywhere;
 }
 
 h3 {
@@ -157,6 +158,8 @@ main {
 
 .segmented button {
   padding: 0 14px;
+  min-width: 0;
+  white-space: normal;
 }
 
 .icon-button {
@@ -209,6 +212,7 @@ main {
   display: block;
   margin-top: 3px;
   font-size: 1.05rem;
+  overflow-wrap: anywhere;
 }
 
 .metric-grid {
@@ -310,6 +314,55 @@ canvas {
   background: #fff;
 }
 
+.heatmap-wrap {
+  display: grid;
+  grid-template-columns: 64px repeat(12, minmax(58px, 1fr));
+  gap: 6px;
+  min-width: 760px;
+  padding: 8px 18px 18px;
+}
+
+.heatmap-panel {
+  overflow-x: auto;
+}
+
+.heatmap-month,
+.heatmap-year,
+.heatmap-cell {
+  min-height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.heatmap-month,
+.heatmap-year {
+  color: var(--muted);
+}
+
+.heatmap-year {
+  justify-content: start;
+}
+
+.heatmap-cell {
+  border: 1px solid rgba(147, 164, 184, 0.16);
+  color: var(--text);
+}
+
+.heatmap-cell.gain {
+  background: rgba(72, 213, 151, calc(0.16 + var(--intensity) * 0.52));
+}
+
+.heatmap-cell.loss {
+  background: rgba(255, 107, 127, calc(0.16 + var(--intensity) * 0.52));
+}
+
+.heatmap-cell.empty {
+  background: rgba(8, 11, 16, 0.52);
+}
+
 .file-link {
   display: inline-flex;
   align-items: center;
@@ -383,5 +436,18 @@ canvas {
   .canvas-wrap,
   .canvas-wrap.small {
     height: 320px;
+  }
+
+  .heatmap-wrap {
+    grid-template-columns: 50px repeat(12, 54px);
+    min-width: 740px;
+    padding: 6px 12px 14px;
+  }
+
+  .heatmap-month,
+  .heatmap-year,
+  .heatmap-cell {
+    min-height: 30px;
+    font-size: 0.68rem;
   }
 }
