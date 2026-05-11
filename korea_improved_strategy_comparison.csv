@@ -1,0 +1,4 @@
+ticker,start,end,buy_signals,sell_signals,stop_loss_exits,rsi_exits,sma_exits,final_signal,market_return_pct,strategy_return_pct,max_drawdown_pct,results_output,chart_output
+005930.KS,2024-10-28,2026-05-11,12,11,0,11,0,1,275.09548286255904,219.69842486755277,-27.239511914676882,005930_ks_improved_sma_crossover_results.csv,005930_ks_improved_sma_crossover_signals.png
+000660.KS,2024-10-28,2026-05-11,16,15,1,14,0,1,1242.6389640254943,409.71028020770274,-35.547407313670895,000660_ks_improved_sma_crossover_results.csv,000660_ks_improved_sma_crossover_signals.png
+^KS11,2024-10-28,2026-05-08,13,12,0,12,0,1,180.8439490241998,111.5880072633678,-21.803009326334422,ks11_improved_sma_crossover_results.csv,ks11_improved_sma_crossover_signals.png

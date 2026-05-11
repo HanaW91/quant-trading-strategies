@@ -30,8 +30,9 @@ Market data will be obtained using the Python library yfinance.
 
 ## Strategy Dashboard
 
-The repository root includes a static GitHub Pages dashboard for the AAPL, NVDA,
-Samsung, SK Hynix, and KOSPI strategy results.
+The repository root includes a static GitHub Pages dashboard for AAPL, NVDA,
+Samsung, SK Hynix, and KOSPI strategy results across the 20/60 MA + MACD and
+50/200 SMA + RSI + Stop Loss strategies.
 
 GitHub Pages URL:
 `https://hanaw91.github.io/quant-trading-strategies/`

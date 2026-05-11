@@ -28,7 +28,7 @@ const strategies = {
   improved: {
     labelKey: "strategyImproved",
     descriptionKey: "strategyImprovedDescription",
-    comparisons: ["improved_strategy_comparison.csv"],
+    comparisons: ["improved_strategy_comparison.csv", "korea_improved_strategy_comparison.csv"],
     equity: [
       { key: "strategy_equity", labelKey: "strategy", color: "#5de4e4" },
       { key: "market_equity", labelKey: "market", color: "#58a6ff" },
