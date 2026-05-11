@@ -342,9 +342,34 @@ canvas {
 }
 
 @media (max-width: 680px) {
-  .metric-grid,
   .chart-grid {
     grid-template-columns: 1fr;
+  }
+
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .metric-card {
+    min-height: 96px;
+    padding: 12px;
+  }
+
+  .metric-card .label {
+    font-size: 0.66rem;
+    line-height: 1.2;
+  }
+
+  .metric-card strong {
+    margin-top: 8px;
+    font-size: 1.35rem;
+  }
+
+  .metric-card span:last-child {
+    margin-top: 7px;
+    font-size: 0.76rem;
+    line-height: 1.25;
   }
 
   .segmented {
