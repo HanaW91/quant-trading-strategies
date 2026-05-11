@@ -28,6 +28,18 @@ Jupyter Notebook
 
 Market data will be obtained using the Python library yfinance.
 
+## Strategy Dashboard
+
+The repository root includes a static GitHub Pages dashboard for the AAPL, NVDA,
+Samsung, SK Hynix, and KOSPI strategy results.
+
+GitHub Pages URL:
+`https://hanaw91.github.io/quant-trading-strategies/`
+
+The hosted Pages version uses the committed CSV and PNG outputs. The live
+yfinance refresh endpoint requires the local Python server and is not available
+on GitHub Pages.
+
 ## Project Structure
 
 quant-trading-strategies  
