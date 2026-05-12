@@ -79,6 +79,16 @@ const tickerLabels = {
     "005930.KS": "三星電子",
     "000660.KS": "SK 海力士",
     "^KS11": "KOSPI 韓國綜合股價指數",
+    VST: "Vistra",
+    CEG: "Constellation Energy",
+    EQIX: "Equinix",
+    AMAT: "應用材料",
+    ASML: "艾司摩爾",
+    LRCX: "科林研發",
+    TSLA: "特斯拉",
+    AMD: "超微半導體",
+    QQQ: "納斯達克 100 ETF",
+    SPY: "標普 500 ETF",
   },
 };
 const tickerOrder = ["AAPL", "NVDA", "TSLA", "AMD", "QQQ", "SPY", "VST", "CEG", "EQIX", "AMAT", "ASML", "LRCX", "005930.KS", "000660.KS", "^KS11"];
@@ -108,6 +118,11 @@ const translations = {
     monthlyHeatmap: "Heatmap",
     portfolioAllocation: "Portfolio Allocation",
     growthModelAllocation: "£5,000 Growth Model",
+    allocationHolding: "Holding",
+    allocationWeight: "Weight",
+    allocationAmount: "Amount",
+    allocationSignal: "Signal",
+    allocationRecommendation: "Recommendation",
     openPng: "Open PNG",
     portfolioVsMarket: "Portfolio vs Market",
     strategyVsMarket: "Strategy vs Market",
@@ -147,6 +162,24 @@ const translations = {
     recommendation: "Recommendation",
     sentimentArticles: "{value} latest articles",
     signalPlusSentiment: "Backtest signal + latest news",
+    buyRecommendation: "Buy",
+    holdRecommendation: "Hold",
+    watchRecommendation: "Watch",
+    cashSignal: "Cash",
+    allocationRoleQQQ: "US tech ETF growth core",
+    allocationRoleSPY: "Broad US market risk stabilizer",
+    allocationRoleSKHynix: "Korean AI memory growth",
+    allocationRoleLRCX: "AI semiconductor equipment",
+    allocationRoleAMD: "AI compute growth",
+    allocationRoleSamsung: "Korean mega-cap semiconductor exposure",
+    allocationRoleAAPL: "US quality tech anchor",
+    allocationRoleNVDA: "AI leader capped for drawdown risk",
+    allocationRoleAMAT: "Semiconductor equipment diversification",
+    allocationRoleKOSPI: "Broad Korean market exposure",
+    allocationRoleVST: "AI power watchlist exposure",
+    allocationRoleASML: "Strategic lithography exposure",
+    allocationRoleEQIX: "Data center exposure with lower drawdown",
+    allocationRoleCEG: "Small AI power diversifier",
     sortinoRatio: "Sortino Ratio",
     winRate: "Win Rate",
     annualizedDaily: "Annualized from daily returns",
@@ -194,6 +227,13 @@ const translations = {
     signalChartAlt: "策略訊號圖",
     monthlyReturns: "月報酬",
     monthlyHeatmap: "熱力圖",
+    portfolioAllocation: "投資組合配置",
+    growthModelAllocation: "£5,000 成長模型",
+    allocationHolding: "持倉",
+    allocationWeight: "權重",
+    allocationAmount: "金額",
+    allocationSignal: "訊號",
+    allocationRecommendation: "建議",
     openPng: "開啟 PNG",
     portfolioVsMarket: "投資組合 vs 市場",
     strategyVsMarket: "策略 vs 市場",
@@ -229,6 +269,28 @@ const translations = {
     marketReturn: "市場報酬",
     maxDrawdown: "最大回撤",
     sharpeRatio: "夏普比率",
+    newsSentiment: "新聞情緒",
+    recommendation: "建議",
+    sentimentArticles: "{value} 篇最新文章",
+    signalPlusSentiment: "回測訊號 + 最新新聞",
+    buyRecommendation: "買入",
+    holdRecommendation: "持有",
+    watchRecommendation: "觀察",
+    cashSignal: "現金",
+    allocationRoleQQQ: "美國科技 ETF 成長核心",
+    allocationRoleSPY: "廣泛美股市場風險穩定器",
+    allocationRoleSKHynix: "韓國 AI 記憶體成長",
+    allocationRoleLRCX: "AI 半導體設備",
+    allocationRoleAMD: "AI 運算成長",
+    allocationRoleSamsung: "韓國大型半導體龍頭配置",
+    allocationRoleAAPL: "美國優質科技核心",
+    allocationRoleNVDA: "AI 龍頭，因回撤風險控制部位",
+    allocationRoleAMAT: "半導體設備分散配置",
+    allocationRoleKOSPI: "廣泛韓國市場配置",
+    allocationRoleVST: "AI 電力觀察名單配置",
+    allocationRoleASML: "關鍵微影設備配置",
+    allocationRoleEQIX: "資料中心配置，回撤較低",
+    allocationRoleCEG: "小型 AI 電力分散配置",
     sortinoRatio: "索提諾比率",
     winRate: "勝率",
     annualizedDaily: "由日報酬年化",
@@ -288,6 +350,11 @@ const els = {
   allocationLabel: document.querySelector("#allocationLabel"),
   allocationTitle: document.querySelector("#allocationTitle"),
   allocationTable: document.querySelector("#allocationTable"),
+  allocationHoldingHeader: document.querySelector("#allocationHoldingHeader"),
+  allocationWeightHeader: document.querySelector("#allocationWeightHeader"),
+  allocationAmountHeader: document.querySelector("#allocationAmountHeader"),
+  allocationSignalHeader: document.querySelector("#allocationSignalHeader"),
+  allocationRecommendationHeader: document.querySelector("#allocationRecommendationHeader"),
   equityCurveLabel: document.querySelector("#equityCurveLabel"),
   exposureLabel: document.querySelector("#exposureLabel"),
   activeSignalTitle: document.querySelector("#activeSignalTitle"),
@@ -486,6 +553,11 @@ function renderStaticText() {
   els.tickerLabel.textContent = tr("tickerLabel");
   els.allocationLabel.textContent = tr("portfolioAllocation");
   els.allocationTitle.textContent = tr("growthModelAllocation");
+  els.allocationHoldingHeader.textContent = tr("allocationHolding");
+  els.allocationWeightHeader.textContent = tr("allocationWeight");
+  els.allocationAmountHeader.textContent = tr("allocationAmount");
+  els.allocationSignalHeader.textContent = tr("allocationSignal");
+  els.allocationRecommendationHeader.textContent = tr("allocationRecommendation");
   els.equityCurveLabel.textContent = tr("equityCurve");
   els.exposureLabel.textContent = tr("exposure");
   els.activeSignalTitle.textContent = tr("activeSignal");
@@ -550,7 +622,7 @@ function sentimentMetrics(row) {
   if (!row.sentiment_score) return [];
   return [
     [tr("newsSentiment"), ratio(row.sentiment_score), tr("sentimentArticles", { value: int(row.article_count) })],
-    [tr("recommendation"), row.recommendation || "N/A", tr("signalPlusSentiment")],
+    [tr("recommendation"), recommendationLabel(row.recommendation), tr("signalPlusSentiment")],
   ];
 }
 
@@ -621,17 +693,52 @@ function renderAllocation() {
 
   els.allocationTable.innerHTML = allocationRows
     .map((row) => {
-      const recommendation = row.recommendation || "Watch";
+      const recommendation = recommendationLabel(row.recommendation || "Watch");
       const signalClass = row.signal === "Long" ? "positive" : "neutral";
+      const holding = tickerLabel(row.ticker) || row.holding;
       return `<tr>
-        <td><strong>${escapeHtml(row.holding)}</strong><span>${escapeHtml(row.role)}</span></td>
+        <td><strong>${escapeHtml(holding)}</strong><span>${escapeHtml(allocationRoleLabel(row))}</span></td>
         <td>${escapeHtml(row.weight_pct)}%</td>
         <td>£${escapeHtml(Number(row.allocation_gbp).toLocaleString())}</td>
-        <td class="${signalClass}">${escapeHtml(row.signal)}</td>
+        <td class="${signalClass}">${escapeHtml(signalLabel(row.signal))}</td>
         <td>${escapeHtml(recommendation)}</td>
       </tr>`;
     })
     .join("");
+}
+
+function recommendationLabel(value) {
+  if (value === "Buy") return tr("buyRecommendation");
+  if (value === "Hold") return tr("holdRecommendation");
+  if (value === "Watch") return tr("watchRecommendation");
+  return value || "N/A";
+}
+
+function signalLabel(value) {
+  if (value === "Long") return tr("active");
+  if (value === "Cash") return tr("cashSignal");
+  return value || "N/A";
+}
+
+function allocationRoleLabel(row) {
+  const keys = {
+    QQQ: "allocationRoleQQQ",
+    SPY: "allocationRoleSPY",
+    "000660.KS": "allocationRoleSKHynix",
+    LRCX: "allocationRoleLRCX",
+    AMD: "allocationRoleAMD",
+    "005930.KS": "allocationRoleSamsung",
+    AAPL: "allocationRoleAAPL",
+    NVDA: "allocationRoleNVDA",
+    AMAT: "allocationRoleAMAT",
+    "^KS11": "allocationRoleKOSPI",
+    VST: "allocationRoleVST",
+    ASML: "allocationRoleASML",
+    EQIX: "allocationRoleEQIX",
+    CEG: "allocationRoleCEG",
+  };
+  const key = keys[row.ticker];
+  return key ? tr(key) : row.role;
 }
 
 function renderCharts() {
