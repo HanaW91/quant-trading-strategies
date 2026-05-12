@@ -17,6 +17,8 @@ from improved_sma_rsi_stop import run_ticker as run_improved_ticker
 ROOT = Path(__file__).resolve().parent
 US_TICKERS = ["AAPL", "NVDA"]
 KOREA_TICKERS = ["005930.KS", "000660.KS", "^KS11"]
+AI_INFRA_TICKERS = ["VST", "CEG", "EQIX", "AMAT", "ASML", "LRCX"]
+GROWTH_ETF_TICKERS = ["TSLA", "AMD", "QQQ", "SPY"]
 REFRESH_LOCK = threading.Lock()
 LAST_REFRESH: dict[str, object] = {}
 
@@ -75,6 +77,7 @@ def run_group(tickers: list[str], start: str, comparison_output: str) -> list[di
         "buy_hold_return_pct",
         "active_sleeve_return_pct",
         "portfolio_return_pct",
+        "portfolio_sharpe_ratio",
         "buy_hold_max_drawdown_pct",
         "active_sleeve_max_drawdown_pct",
         "portfolio_max_drawdown_pct",
@@ -84,9 +87,34 @@ def run_group(tickers: list[str], start: str, comparison_output: str) -> list[di
     comparison = comparison[columns]
     comparison["results_output"] = comparison["results_output"].map(lambda path: Path(path).name)
     comparison["chart_output"] = comparison["chart_output"].map(lambda path: Path(path).name)
+    comparison = preserve_sentiment_columns(comparison, ROOT / comparison_output)
     comparison.to_csv(ROOT / comparison_output, index=False)
 
     return comparison.to_dict(orient="records")
+
+
+def preserve_sentiment_columns(comparison: pd.DataFrame, output_path: Path) -> pd.DataFrame:
+    if not output_path.exists():
+        return comparison
+
+    existing = pd.read_csv(output_path)
+    sentiment_columns = [
+        "sentiment_score",
+        "sentiment_label",
+        "article_count",
+        "positive_articles",
+        "negative_articles",
+        "neutral_articles",
+        "recommendation",
+        "top_headline",
+        "top_url",
+        "sentiment_updated_at",
+    ]
+    available = [column for column in sentiment_columns if column in existing.columns]
+    if not available:
+        return comparison
+
+    return comparison.merge(existing[["ticker", *available]], on="ticker", how="left")
 
 
 def run_improved_group(tickers: list[str], start: str, comparison_output: str) -> list[dict[str, object]]:
@@ -124,6 +152,16 @@ def refresh_data() -> dict[str, object]:
     with REFRESH_LOCK:
         us_rows = run_group(US_TICKERS, "2020-01-01", "ma20_ma60_macd_strategy_comparison.csv")
         korea_rows = run_group(KOREA_TICKERS, "2024-01-01", "korea_ma20_ma60_macd_strategy_comparison.csv")
+        ai_infra_rows = run_group(
+            AI_INFRA_TICKERS,
+            "2023-01-01",
+            "ai_infrastructure_ma20_ma60_macd_strategy_comparison.csv",
+        )
+        growth_etf_rows = run_group(
+            GROWTH_ETF_TICKERS,
+            "2023-01-01",
+            "growth_etf_ma20_ma60_macd_strategy_comparison.csv",
+        )
         us_improved_rows = run_improved_group(US_TICKERS, "2020-01-01", "improved_strategy_comparison.csv")
         korea_improved_rows = run_improved_group(
             KOREA_TICKERS,
@@ -135,10 +173,12 @@ def refresh_data() -> dict[str, object]:
             "groups": {
                 "us": us_rows,
                 "korea": korea_rows,
+                "ai_infra": ai_infra_rows,
+                "growth_etf": growth_etf_rows,
                 "us_improved": us_improved_rows,
                 "korea_improved": korea_improved_rows,
             },
-            "tickers": US_TICKERS + KOREA_TICKERS,
+            "tickers": US_TICKERS + KOREA_TICKERS + AI_INFRA_TICKERS + GROWTH_ETF_TICKERS,
             "refreshed_at": pd.Timestamp.now(tz="Europe/London").isoformat(),
         }
         LAST_REFRESH.clear()

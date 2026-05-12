@@ -13,6 +13,7 @@ Example:
 from __future__ import annotations
 
 import argparse
+import math
 import re
 
 import matplotlib.pyplot as plt
@@ -143,6 +144,14 @@ def max_drawdown_pct(equity: pd.Series) -> float:
     return float((equity / running_peak - 1).min() * 100)
 
 
+def sharpe_ratio(returns: pd.Series) -> float:
+    clean_returns = returns.dropna()
+    volatility = clean_returns.std()
+    if clean_returns.empty or volatility == 0:
+        return float("nan")
+    return float((clean_returns.mean() / volatility) * math.sqrt(252))
+
+
 def summarize_strategy(results: pd.DataFrame) -> dict[str, float | int | str]:
     """Return a compact performance summary for the strategy."""
     completed = results.dropna(subset=["ma_short", "ma_long", "macd", "macd_signal"]).copy()
@@ -168,6 +177,7 @@ def summarize_strategy(results: pd.DataFrame) -> dict[str, float | int | str]:
         "buy_hold_return_pct": (market_total - 1) * 100,
         "active_sleeve_return_pct": (active_total - 1) * 100,
         "portfolio_return_pct": (portfolio_total - 1) * 100,
+        "portfolio_sharpe_ratio": sharpe_ratio(completed["portfolio_return"]),
         "buy_hold_max_drawdown_pct": max_drawdown_pct(completed["market_equity"]),
         "active_sleeve_max_drawdown_pct": max_drawdown_pct(completed["active_equity"]),
         "portfolio_max_drawdown_pct": max_drawdown_pct(completed["portfolio_equity"]),
@@ -367,6 +377,7 @@ def main() -> None:
             "buy_hold_return_pct",
             "active_sleeve_return_pct",
             "portfolio_return_pct",
+            "portfolio_sharpe_ratio",
             "buy_hold_max_drawdown_pct",
             "active_sleeve_max_drawdown_pct",
             "portfolio_max_drawdown_pct",
@@ -374,6 +385,10 @@ def main() -> None:
             "chart_output",
         ]
     ]
+    comparison["portfolio_sharpe_ratio"] = pd.to_numeric(
+        comparison["portfolio_sharpe_ratio"],
+        errors="coerce",
+    )
     comparison.to_csv(args.comparison_output, index=False)
 
     print("\nStrategy settings")
@@ -400,6 +415,9 @@ def main() -> None:
     ]
     for column in pct_columns:
         display[column] = display[column].map("{:.2f}%".format)
+    display["portfolio_sharpe_ratio"] = display["portfolio_sharpe_ratio"].map(
+        lambda value: "N/A" if pd.isna(value) else f"{value:.2f}"
+    )
 
     print(
         display[
@@ -414,6 +432,7 @@ def main() -> None:
                 "buy_hold_return_pct",
                 "active_sleeve_return_pct",
                 "portfolio_return_pct",
+                "portfolio_sharpe_ratio",
                 "portfolio_max_drawdown_pct",
             ]
         ].to_string(index=False)

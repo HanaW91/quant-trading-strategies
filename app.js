@@ -5,6 +5,8 @@ const strategies = {
     comparisons: [
       "ma20_ma60_macd_strategy_comparison.csv",
       "korea_ma20_ma60_macd_strategy_comparison.csv",
+      "ai_infrastructure_ma20_ma60_macd_strategy_comparison.csv",
+      "growth_etf_ma20_ma60_macd_strategy_comparison.csv",
     ],
     equity: [
       { key: "portfolio_equity", labelKey: "portfolio", color: "#5de4e4" },
@@ -14,13 +16,15 @@ const strategies = {
     returnKey: "portfolio_return",
     signalKey: "active_position",
     metrics(row) {
-      return [
-        [tr("portfolioReturn"), pct(row.portfolio_return_pct), diff(row.portfolio_return_pct, row.buy_hold_return_pct)],
-        [tr("buyHoldReturn"), pct(row.buy_hold_return_pct), tr("marketBaseline")],
-        [tr("activeSleeveReturn"), pct(row.active_sleeve_return_pct), tr("activeDays", { value: num(row.active_days_pct, 1) })],
-        [tr("portfolioMaxDrawdown"), pct(row.portfolio_max_drawdown_pct), tr("blendedDrawdown")],
-        [tr("buySignals"), int(row.buy_signals), tr("sellSignalsNote", { value: int(row.sell_signals) })],
-        [tr("finalSignal"), row.final_active_signal === "1" ? tr("active") : tr("flat"), tr("positionAtEnd")],
+    return [
+      [tr("portfolioReturn"), pct(row.portfolio_return_pct), diff(row.portfolio_return_pct, row.buy_hold_return_pct)],
+      [tr("buyHoldReturn"), pct(row.buy_hold_return_pct), tr("marketBaseline")],
+      [tr("activeSleeveReturn"), pct(row.active_sleeve_return_pct), tr("activeDays", { value: num(row.active_days_pct, 1) })],
+      [tr("sharpeRatio"), ratio(row.portfolio_sharpe_ratio), tr("annualizedDaily")],
+      ...sentimentMetrics(row),
+      [tr("portfolioMaxDrawdown"), pct(row.portfolio_max_drawdown_pct), tr("blendedDrawdown")],
+      [tr("buySignals"), int(row.buy_signals), tr("sellSignalsNote", { value: int(row.sell_signals) })],
+      [tr("finalSignal"), row.final_active_signal === "1" ? tr("active") : tr("flat"), tr("positionAtEnd")],
         [tr("activeMaxDrawdown"), pct(row.active_sleeve_max_drawdown_pct), tr("activeSleeveRisk")],
         [tr("buyHoldMaxDrawdown"), pct(row.buy_hold_max_drawdown_pct), tr("marketBaselineRisk")],
       ];
@@ -58,6 +62,16 @@ const tickerLabels = {
     "005930.KS": "Samsung",
     "000660.KS": "SK Hynix",
     "^KS11": "KOSPI",
+    VST: "VST",
+    CEG: "CEG",
+    EQIX: "EQIX",
+    AMAT: "AMAT",
+    ASML: "ASML",
+    LRCX: "LRCX",
+    TSLA: "TSLA",
+    AMD: "AMD",
+    QQQ: "QQQ",
+    SPY: "SPY",
   },
   zh: {
     AAPL: "蘋果",
@@ -67,7 +81,7 @@ const tickerLabels = {
     "^KS11": "KOSPI 韓國綜合股價指數",
   },
 };
-const tickerOrder = ["AAPL", "NVDA", "005930.KS", "000660.KS", "^KS11"];
+const tickerOrder = ["AAPL", "NVDA", "TSLA", "AMD", "QQQ", "SPY", "VST", "CEG", "EQIX", "AMAT", "ASML", "LRCX", "005930.KS", "000660.KS", "^KS11"];
 
 const translations = {
   en: {
@@ -92,6 +106,8 @@ const translations = {
     signalChartAlt: "Strategy signal chart",
     monthlyReturns: "Monthly Returns",
     monthlyHeatmap: "Heatmap",
+    portfolioAllocation: "Portfolio Allocation",
+    growthModelAllocation: "£5,000 Growth Model",
     openPng: "Open PNG",
     portfolioVsMarket: "Portfolio vs Market",
     strategyVsMarket: "Strategy vs Market",
@@ -127,6 +143,10 @@ const translations = {
     marketReturn: "Market Return",
     maxDrawdown: "Max Drawdown",
     sharpeRatio: "Sharpe Ratio",
+    newsSentiment: "News Sentiment",
+    recommendation: "Recommendation",
+    sentimentArticles: "{value} latest articles",
+    signalPlusSentiment: "Backtest signal + latest news",
     sortinoRatio: "Sortino Ratio",
     winRate: "Win Rate",
     annualizedDaily: "Annualized from daily returns",
@@ -239,6 +259,7 @@ const translations = {
 let state = { strategy: "macd", ticker: "AAPL", lang: "en" };
 let summaries = {};
 let activeSeries = [];
+let allocationRows = [];
 let cacheVersion = Date.now();
 let refreshState = { type: "local", time: null, error: "" };
 const refreshEveryMs = 5 * 60 * 1000;
@@ -264,6 +285,9 @@ const els = {
   signalChart: document.querySelector("#signalChart"),
   signalImage: document.querySelector("#signalImage"),
   chartLink: document.querySelector("#chartLink"),
+  allocationLabel: document.querySelector("#allocationLabel"),
+  allocationTitle: document.querySelector("#allocationTitle"),
+  allocationTable: document.querySelector("#allocationTable"),
   equityCurveLabel: document.querySelector("#equityCurveLabel"),
   exposureLabel: document.querySelector("#exposureLabel"),
   activeSignalTitle: document.querySelector("#activeSignalTitle"),
@@ -299,6 +323,7 @@ async function init() {
     renderRefreshStatus();
   }
   await loadSummaries();
+  await loadAllocation();
   renderTabs();
   await render();
   window.addEventListener("resize", () => renderCharts());
@@ -359,6 +384,14 @@ async function loadSummaries() {
   summaries = Object.fromEntries(entries);
 }
 
+async function loadAllocation() {
+  try {
+    allocationRows = parseCsv(await fetchText("portfolio_allocation_with_spy.csv"));
+  } catch (error) {
+    allocationRows = [];
+  }
+}
+
 async function render() {
   const strategy = strategies[state.strategy];
   const row = summaries[state.strategy][state.ticker];
@@ -372,6 +405,7 @@ async function render() {
 
   renderQuickStats(row);
   renderMetrics([...strategy.metrics(row), ...analyticsMetrics(activeSeries, strategy.returnKey)]);
+  renderAllocation();
   renderMonthlyHeatmap(activeSeries, strategy.returnKey);
   renderCharts();
 }
@@ -393,6 +427,7 @@ async function refreshLatestPrices(options = {}) {
     if (!payload.ok) throw new Error(payload.error || "Refresh failed");
 
     await loadSummaries();
+    await loadAllocation();
     renderTabs();
     await render();
     refreshState = { type: "updated", time: payload.refreshed_at, error: "" };
@@ -449,6 +484,8 @@ function renderStaticText() {
   els.pageTitle.textContent = tr("pageTitle");
   els.strategyLabel.textContent = tr("strategyLabel");
   els.tickerLabel.textContent = tr("tickerLabel");
+  els.allocationLabel.textContent = tr("portfolioAllocation");
+  els.allocationTitle.textContent = tr("growthModelAllocation");
   els.equityCurveLabel.textContent = tr("equityCurve");
   els.exposureLabel.textContent = tr("exposure");
   els.activeSignalTitle.textContent = tr("activeSignal");
@@ -509,6 +546,14 @@ function analyticsMetrics(rows, returnKey) {
   ];
 }
 
+function sentimentMetrics(row) {
+  if (!row.sentiment_score) return [];
+  return [
+    [tr("newsSentiment"), ratio(row.sentiment_score), tr("sentimentArticles", { value: int(row.article_count) })],
+    [tr("recommendation"), row.recommendation || "N/A", tr("signalPlusSentiment")],
+  ];
+}
+
 function renderMonthlyHeatmap(rows, returnKey) {
   const monthly = monthlyReturns(rows, returnKey);
   const years = [...new Set(monthly.map((item) => item.year))].sort();
@@ -564,6 +609,27 @@ function renderMetrics(metrics) {
     .map(([label, value, note]) => {
       const cls = String(value).startsWith("-") ? "negative" : String(value).includes("%") ? "positive" : "neutral";
       return `<article class="metric-card"><span class="label">${label}</span><strong class="${cls}">${value}</strong><span>${note}</span></article>`;
+    })
+    .join("");
+}
+
+function renderAllocation() {
+  if (!allocationRows.length) {
+    els.allocationTable.innerHTML = `<tr><td colspan="5">N/A</td></tr>`;
+    return;
+  }
+
+  els.allocationTable.innerHTML = allocationRows
+    .map((row) => {
+      const recommendation = row.recommendation || "Watch";
+      const signalClass = row.signal === "Long" ? "positive" : "neutral";
+      return `<tr>
+        <td><strong>${escapeHtml(row.holding)}</strong><span>${escapeHtml(row.role)}</span></td>
+        <td>${escapeHtml(row.weight_pct)}%</td>
+        <td>£${escapeHtml(Number(row.allocation_gbp).toLocaleString())}</td>
+        <td class="${signalClass}">${escapeHtml(row.signal)}</td>
+        <td>${escapeHtml(recommendation)}</td>
+      </tr>`;
     })
     .join("");
 }

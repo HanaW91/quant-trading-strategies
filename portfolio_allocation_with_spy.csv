@@ -1,0 +1,15 @@
+holding,ticker,allocation_gbp,weight_pct,signal,recommendation,role
+QQQ,QQQ,600,12,Long,Buy,US tech ETF growth core
+SPY,SPY,500,10,Long,Buy,Broad US market risk stabilizer
+SK Hynix,000660.KS,600,12,Long,Buy,Korean AI memory growth
+LRCX,LRCX,500,10,Long,Buy,AI semiconductor equipment
+AMD,AMD,450,9,Long,Hold,AI compute growth
+Samsung,005930.KS,400,8,Long,Buy,Korean mega-cap semiconductor exposure
+AAPL,AAPL,300,6,Long,Hold,US quality tech anchor
+NVDA,NVDA,300,6,Long,Hold,AI leader capped for drawdown risk
+AMAT,AMAT,300,6,Long,Buy,Semiconductor equipment diversification
+KOSPI,^KS11,300,6,Long,,Broad Korean market exposure
+VST,VST,250,5,Cash,,AI power watchlist exposure
+ASML,ASML,200,4,Long,,Strategic lithography exposure
+EQIX,EQIX,200,4,Cash,,Data center exposure with lower drawdown
+CEG,CEG,100,2,Cash,,Small AI power diversifier

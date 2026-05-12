@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Quant Strategy Results</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="styles.css?v=analytics-heatmap-20260512" />
+    <link rel="stylesheet" href="styles.css?v=spy-sentiment-20260512" />
   </head>
   <body>
     <header class="topbar">
@@ -43,6 +43,29 @@
       </section>
 
       <section class="metric-grid" id="metricGrid"></section>
+
+      <section class="panel allocation-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="label" id="allocationLabel">Portfolio Allocation</p>
+            <h3 id="allocationTitle">£5,000 Growth Model</h3>
+          </div>
+        </div>
+        <div class="allocation-table-wrap">
+          <table class="allocation-table">
+            <thead>
+              <tr>
+                <th>Holding</th>
+                <th>Weight</th>
+                <th>Amount</th>
+                <th>Signal</th>
+                <th>Recommendation</th>
+              </tr>
+            </thead>
+            <tbody id="allocationTable"></tbody>
+          </table>
+        </div>
+      </section>
 
       <section class="chart-grid">
         <article class="panel wide">
@@ -93,6 +116,6 @@
       </section>
     </main>
 
-    <script src="app.js?v=analytics-heatmap-20260512" charset="utf-8"></script>
+    <script src="app.js?v=spy-sentiment-20260512" charset="utf-8"></script>
   </body>
 </html>
