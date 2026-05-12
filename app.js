@@ -20,7 +20,6 @@ const strategies = {
       [tr("portfolioReturn"), pct(row.portfolio_return_pct), diff(row.portfolio_return_pct, row.buy_hold_return_pct)],
       [tr("buyHoldReturn"), pct(row.buy_hold_return_pct), tr("marketBaseline")],
       [tr("activeSleeveReturn"), pct(row.active_sleeve_return_pct), tr("activeDays", { value: num(row.active_days_pct, 1) })],
-      [tr("sharpeRatio"), ratio(row.portfolio_sharpe_ratio), tr("annualizedDaily")],
       ...sentimentMetrics(row),
       [tr("portfolioMaxDrawdown"), pct(row.portfolio_max_drawdown_pct), tr("blendedDrawdown")],
       [tr("buySignals"), int(row.buy_signals), tr("sellSignalsNote", { value: int(row.sell_signals) })],
@@ -471,7 +470,11 @@ async function render() {
   els.signalImage.src = withCacheBust(row.chart_output);
 
   renderQuickStats(row);
-  renderMetrics([...strategy.metrics(row), ...analyticsMetrics(activeSeries, strategy.returnKey)]);
+  renderMetrics([
+    ...strategy.metrics(row),
+    [tr("sharpeRatio"), ratio(csvOrCalculatedSharpe(row, activeSeries, strategy.returnKey)), tr("annualizedDaily")],
+    ...analyticsMetrics(activeSeries, strategy.returnKey),
+  ]);
   renderAllocation();
   renderMonthlyHeatmap(activeSeries, strategy.returnKey);
   renderCharts();
@@ -614,6 +617,16 @@ function analyticsMetrics(rows, returnKey) {
     [tr("sortinoRatio"), ratio(sortino), tr("downsideRiskAdjusted")],
     [tr("winRate"), pct(winRate), tr("positiveReturnDays")],
   ];
+}
+
+function csvOrCalculatedSharpe(row, rows, returnKey) {
+  const csvSharpe = number(row.portfolio_sharpe_ratio);
+  if (Number.isFinite(csvSharpe)) return csvSharpe;
+
+  const returns = rows.map((item) => number(item[returnKey])).filter(Number.isFinite);
+  const average = mean(returns);
+  const volatility = standardDeviation(returns);
+  return volatility > 0 ? (average / volatility) * Math.sqrt(252) : NaN;
 }
 
 function sentimentMetrics(row) {
