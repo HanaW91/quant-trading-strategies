@@ -606,13 +606,11 @@ function analyticsMetrics(rows, returnKey) {
   const average = mean(returns);
   const volatility = standardDeviation(returns);
   const downside = standardDeviation(returns.filter((value) => value < 0));
-  const sharpe = volatility > 0 ? (average / volatility) * Math.sqrt(252) : NaN;
   const sortino = downside > 0 ? (average / downside) * Math.sqrt(252) : NaN;
   const wins = activeReturns.filter((value) => value > 0).length;
   const winRate = activeReturns.length ? (wins / activeReturns.length) * 100 : NaN;
 
   return [
-    [tr("sharpeRatio"), ratio(sharpe), tr("annualizedDaily")],
     [tr("sortinoRatio"), ratio(sortino), tr("downsideRiskAdjusted")],
     [tr("winRate"), pct(winRate), tr("positiveReturnDays")],
   ];
