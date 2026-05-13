@@ -6,7 +6,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from aapl_sma_crossover import download_prices_for_tickers, max_drawdown_pct, safe_output_prefix
+from aapl_sma_crossover import CHARTS_DIR, DATA_DIR, download_prices_for_tickers, max_drawdown_pct, safe_output_prefix
 
 
 def add_rsi(close: pd.Series, period: int) -> pd.Series:
@@ -138,8 +138,10 @@ def plot_signals(results: pd.DataFrame, ticker: str, output: str, short_window: 
 
 def run_ticker(ticker: str, prices: pd.DataFrame, args: argparse.Namespace) -> dict[str, float | int | str]:
     prefix = safe_output_prefix(ticker)
-    results_output = f"{prefix}_improved_sma_crossover_results.csv"
-    chart_output = f"{prefix}_improved_sma_crossover_signals.png"
+    DATA_DIR.mkdir(exist_ok=True)
+    CHARTS_DIR.mkdir(exist_ok=True)
+    results_output = DATA_DIR / f"{prefix}_improved_sma_crossover_results.csv"
+    chart_output = CHARTS_DIR / f"{prefix}_improved_sma_crossover_signals.png"
     results = add_strategy(
         prices,
         short_window=args.short_window,
@@ -150,8 +152,8 @@ def run_ticker(ticker: str, prices: pd.DataFrame, args: argparse.Namespace) -> d
     )
     summary = summarize(results)
     summary["ticker"] = ticker
-    summary["results_output"] = results_output
-    summary["chart_output"] = chart_output
+    summary["results_output"] = f"../data/{results_output.name}"
+    summary["chart_output"] = f"../charts/{chart_output.name}"
 
     results.to_csv(results_output)
     plot_signals(results, ticker, chart_output, args.short_window, args.long_window)
@@ -197,7 +199,8 @@ def main() -> None:
             "chart_output",
         ]
     ]
-    comparison.to_csv(args.comparison_output, index=False)
+    DATA_DIR.mkdir(exist_ok=True)
+    comparison.to_csv(DATA_DIR / Path(args.comparison_output).name, index=False)
 
     display = comparison.copy()
     for column in ["market_return_pct", "strategy_return_pct", "max_drawdown_pct"]:

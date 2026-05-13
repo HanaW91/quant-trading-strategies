@@ -3,10 +3,10 @@ const strategies = {
     labelKey: "strategyMacd",
     descriptionKey: "strategyMacdDescription",
     comparisons: [
-      "ma20_ma60_macd_strategy_comparison.csv",
-      "korea_ma20_ma60_macd_strategy_comparison.csv",
-      "ai_infrastructure_ma20_ma60_macd_strategy_comparison.csv",
-      "growth_etf_ma20_ma60_macd_strategy_comparison.csv",
+      "../data/ma20_ma60_macd_strategy_comparison.csv",
+      "../data/korea_ma20_ma60_macd_strategy_comparison.csv",
+      "../data/ai_infrastructure_ma20_ma60_macd_strategy_comparison.csv",
+      "../data/growth_etf_ma20_ma60_macd_strategy_comparison.csv",
     ],
     equity: [
       { key: "portfolio_equity", labelKey: "portfolio", color: "#5de4e4" },
@@ -32,7 +32,7 @@ const strategies = {
   improved: {
     labelKey: "strategyImproved",
     descriptionKey: "strategyImprovedDescription",
-    comparisons: ["improved_strategy_comparison.csv", "korea_improved_strategy_comparison.csv"],
+    comparisons: ["../data/improved_strategy_comparison.csv", "../data/korea_improved_strategy_comparison.csv"],
     equity: [
       { key: "strategy_equity", labelKey: "strategy", color: "#5de4e4" },
       { key: "market_equity", labelKey: "market", color: "#58a6ff" },
@@ -452,7 +452,7 @@ async function loadSummaries() {
 
 async function loadAllocation() {
   try {
-    allocationRows = parseCsv(await fetchText("portfolio_allocation_with_spy.csv"));
+    allocationRows = parseCsv(await fetchText("../data/portfolio_allocation_with_spy.csv"));
   } catch (error) {
     allocationRows = [];
   }

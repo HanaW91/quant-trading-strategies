@@ -23,14 +23,15 @@ from urllib.request import Request, urlopen
 import pandas as pd
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = ROOT / "data"
 NEWSAPI_URL = "https://newsapi.org/v2/everything"
 DEFAULT_TICKERS = ["AAPL", "NVDA", "LRCX", "AMAT", "AMD", "QQQ", "SPY", "005930.KS", "000660.KS"]
 COMPARISON_FILES = [
-    ROOT / "ma20_ma60_macd_strategy_comparison.csv",
-    ROOT / "growth_etf_ma20_ma60_macd_strategy_comparison.csv",
-    ROOT / "ai_infrastructure_ma20_ma60_macd_strategy_comparison.csv",
-    ROOT / "korea_ma20_ma60_macd_strategy_comparison.csv",
+    DATA_DIR / "ma20_ma60_macd_strategy_comparison.csv",
+    DATA_DIR / "growth_etf_ma20_ma60_macd_strategy_comparison.csv",
+    DATA_DIR / "ai_infrastructure_ma20_ma60_macd_strategy_comparison.csv",
+    DATA_DIR / "korea_ma20_ma60_macd_strategy_comparison.csv",
 ]
 
 QUERY_BY_TICKER = {
@@ -229,7 +230,7 @@ def backfill_sharpe(row: pd.Series) -> float:
     if not results_output:
         return float("nan")
 
-    results_path = ROOT / str(results_output)
+    results_path = ROOT / str(results_output).lstrip("./")
     if not results_path.exists():
         return float("nan")
 
@@ -338,7 +339,8 @@ def main() -> None:
         time.sleep(args.sleep)
 
     sentiment = pd.DataFrame(results)
-    sentiment.to_csv(ROOT / args.output, index=False)
+    DATA_DIR.mkdir(exist_ok=True)
+    sentiment.to_csv(DATA_DIR / Path(args.output).name, index=False)
     merge_sentiment_into_comparisons(sentiment)
 
     display = sentiment[

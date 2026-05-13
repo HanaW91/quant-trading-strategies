@@ -1,3 +1,0 @@
-ticker,start,end,buy_signals,sell_signals,final_active_signal,active_days_pct,buy_hold_return_pct,active_sleeve_return_pct,portfolio_return_pct,buy_hold_max_drawdown_pct,active_sleeve_max_drawdown_pct,portfolio_max_drawdown_pct,results_output,chart_output
-AAPL,2020-03-27,2026-05-12,47,46,1,28.135152696556204,307.55452040334364,115.0993793420617,211.32694987270267,-33.3605140245371,-12.820105775942626,-22.437983227645965,aapl_ma20_ma60_macd_results.csv,aapl_ma20_ma60_macd_signals.png
-NVDA,2020-03-27,2026-05-12,47,46,1,32.61858349577648,3597.690626532868,391.9807263953011,1994.8356764640846,-66.33509283906822,-35.247023890465414,-55.22572884696157,nvda_ma20_ma60_macd_results.csv,nvda_ma20_ma60_macd_signals.png

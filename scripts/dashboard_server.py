@@ -10,11 +10,13 @@ from urllib.parse import urlparse
 
 import pandas as pd
 
-from aapl_sma_crossover import download_prices_for_tickers, run_ticker, safe_output_prefix
+from aapl_sma_crossover import DATA_DIR, CHARTS_DIR, download_prices_for_tickers, run_ticker, safe_output_prefix
 from improved_sma_rsi_stop import run_ticker as run_improved_ticker
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR.mkdir(exist_ok=True)
+CHARTS_DIR.mkdir(exist_ok=True)
 US_TICKERS = ["AAPL", "NVDA"]
 KOREA_TICKERS = ["005930.KS", "000660.KS", "^KS11"]
 AI_INFRA_TICKERS = ["VST", "CEG", "EQIX", "AMAT", "ASML", "LRCX"]
@@ -60,8 +62,8 @@ def run_group(tickers: list[str], start: str, comparison_output: str) -> list[di
                 ticker=ticker,
                 prices=prices_by_ticker[ticker],
                 args=args,
-                results_output=str(ROOT / f"{prefix}_ma20_ma60_macd_results.csv"),
-                chart_output=str(ROOT / f"{prefix}_ma20_ma60_macd_signals.png"),
+                results_output=str(DATA_DIR / f"{prefix}_ma20_ma60_macd_results.csv"),
+                chart_output=str(CHARTS_DIR / f"{prefix}_ma20_ma60_macd_signals.png"),
             )
         )
 
@@ -85,10 +87,10 @@ def run_group(tickers: list[str], start: str, comparison_output: str) -> list[di
         "chart_output",
     ]
     comparison = comparison[columns]
-    comparison["results_output"] = comparison["results_output"].map(lambda path: Path(path).name)
-    comparison["chart_output"] = comparison["chart_output"].map(lambda path: Path(path).name)
-    comparison = preserve_sentiment_columns(comparison, ROOT / comparison_output)
-    comparison.to_csv(ROOT / comparison_output, index=False)
+    comparison["results_output"] = comparison["results_output"].map(lambda path: f"../data/{Path(path).name}")
+    comparison["chart_output"] = comparison["chart_output"].map(lambda path: f"../charts/{Path(path).name}")
+    comparison = preserve_sentiment_columns(comparison, DATA_DIR / comparison_output)
+    comparison.to_csv(DATA_DIR / comparison_output, index=False)
 
     return comparison.to_dict(orient="records")
 
@@ -144,7 +146,9 @@ def run_improved_group(tickers: list[str], start: str, comparison_output: str) -
         "chart_output",
     ]
     comparison = comparison[columns]
-    comparison.to_csv(ROOT / comparison_output, index=False)
+    comparison["results_output"] = comparison["results_output"].map(lambda path: f"../data/{Path(path).name}")
+    comparison["chart_output"] = comparison["chart_output"].map(lambda path: f"../charts/{Path(path).name}")
+    comparison.to_csv(DATA_DIR / comparison_output, index=False)
     return comparison.to_dict(orient="records")
 
 
@@ -196,6 +200,9 @@ class DashboardHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
+        if parsed.path == "/":
+            self.path = "/dashboard/index.html"
+            return super().do_GET()
         if parsed.path == "/api/status":
             self.send_json(LAST_REFRESH or {"ok": True, "refreshed_at": None})
             return

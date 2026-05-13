@@ -1,0 +1,3 @@
+"ticker","start","end","buy_signals","sell_signals","stop_loss_exits","rsi_exits","sma_exits","final_signal","market_return_pct","strategy_return_pct","max_drawdown_pct","results_output","chart_output"
+"AAPL","2020-10-15","2025-12-31","48","48","0","47","1","0","275.1434452703461","33.203857234420475","-21.44504206690311","../data/aapl_improved_sma_crossover_results.csv","../charts/aapl_improved_sma_crossover_signals.png"
+"NVDA","2020-10-15","2025-12-31","63","62","2","60","0","1","3023.389598069058","258.3697082905031","-37.246077770985664","../data/nvda_improved_sma_crossover_results.csv","../charts/nvda_improved_sma_crossover_signals.png"

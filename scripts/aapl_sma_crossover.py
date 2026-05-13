@@ -15,10 +15,16 @@ from __future__ import annotations
 import argparse
 import math
 import re
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import yfinance as yf
+
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = PROJECT_ROOT / "data"
+CHARTS_DIR = PROJECT_ROOT / "charts"
 
 
 def safe_output_prefix(ticker: str) -> str:
@@ -345,18 +351,20 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    DATA_DIR.mkdir(exist_ok=True)
+    CHARTS_DIR.mkdir(exist_ok=True)
     tickers = [ticker.upper() for ticker in (args.tickers or [args.ticker])]
     prices_by_ticker = download_prices_for_tickers(tickers, args.start, args.end)
 
     output_paths = {}
     for ticker in tickers:
         if len(tickers) == 1:
-            output_paths[ticker] = (args.output, args.chart_output)
+            output_paths[ticker] = (str(DATA_DIR / Path(args.output).name), str(CHARTS_DIR / Path(args.chart_output).name))
         else:
             prefix = safe_output_prefix(ticker)
             output_paths[ticker] = (
-                f"{prefix}_ma20_ma60_macd_results.csv",
-                f"{prefix}_ma20_ma60_macd_signals.png",
+                str(DATA_DIR / f"{prefix}_ma20_ma60_macd_results.csv"),
+                str(CHARTS_DIR / f"{prefix}_ma20_ma60_macd_signals.png"),
             )
 
     summaries = [
@@ -389,7 +397,9 @@ def main() -> None:
         comparison["portfolio_sharpe_ratio"],
         errors="coerce",
     )
-    comparison.to_csv(args.comparison_output, index=False)
+    comparison["results_output"] = comparison["results_output"].map(lambda path: f"../data/{Path(path).name}")
+    comparison["chart_output"] = comparison["chart_output"].map(lambda path: f"../charts/{Path(path).name}")
+    comparison.to_csv(DATA_DIR / Path(args.comparison_output).name, index=False)
 
     print("\nStrategy settings")
     print("-----------------")
@@ -398,7 +408,7 @@ def main() -> None:
     print(f"Moving averages: MA{args.short_window} / MA{args.long_window}")
     print(f"MACD: {args.macd_fast}, {args.macd_slow}, {args.macd_signal}")
     print("Active sleeve: invested when MA20 > MA60 and MACD > MACD signal; otherwise cash")
-    print(f"Saved comparison to {args.comparison_output}")
+    print(f"Saved comparison to {DATA_DIR / Path(args.comparison_output).name}")
 
     print("\nComparison")
     print("----------")
